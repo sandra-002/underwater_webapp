@@ -2,6 +2,7 @@ from flask import Flask, request, send_file
 import cv2
 import numpy as np
 import os
+import sys
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ def apply_clahe(image_path):
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
     
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
     l_clahe = clahe.apply(l)
     lab_clahe = cv2.merge((l_clahe, a, b))
     enhanced_img = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
@@ -40,7 +41,6 @@ def upload_file():
             processed_path = apply_clahe(filepath)
             return send_file(processed_path, mimetype='image/png')
 
-   
     return """
     <!doctype html>
     <html>
@@ -72,4 +72,5 @@ def upload_file():
     """
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Use Render-assigned port
+    app.run(host='0.0.0.0', port=port)
